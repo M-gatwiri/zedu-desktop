@@ -48,8 +48,17 @@ class GroupDM {
 class GroupDmNotifier extends Notifier<List<GroupDM>> {
   final Map<String, List<String>> _offlineQueue = {};
 
+  /// Changes every time the provider is rebuilt (sign-out invalidates it, and
+  /// the same notifier is reused for the next session). A delayed operation
+  /// remembers the value it started with and gives up if it changed, so work
+  /// begun in one session never lands in the next one's list.
+  int _generation = 0;
+
+  bool _isStale(int generation) => !ref.mounted || generation != _generation;
+
   @override
   List<GroupDM> build() {
+    _generation++;
     _listenToWebsockets();
     _listenToNetwork();
     return [];
@@ -88,7 +97,15 @@ class GroupDmNotifier extends Notifier<List<GroupDM>> {
   Future<Result<GroupDM>> createGroupDm(
     List<TeamMember> selectedMembers,
   ) async {
+    final generation = _generation;
     await Future<void>.delayed(const Duration(milliseconds: 800));
+    if (_isStale(generation)) {
+      return Failure<GroupDM>(
+        const ApiFailure(
+          message: 'Your session changed before the group was created.',
+        ),
+      );
+    }
 
     final selectedIds = selectedMembers.map((m) => m.id).toSet();
     for (final group in state) {
@@ -139,8 +156,10 @@ class GroupDmNotifier extends Notifier<List<GroupDM>> {
       return;
     }
 
+    final generation = _generation;
     // Simulate API delay
     await Future<void>.delayed(const Duration(milliseconds: 300));
+    if (_isStale(generation)) return;
 
     state = [
       for (final group in state)
