@@ -127,7 +127,14 @@ class ChatHistoryNotifier extends ChangeNotifier {
 
       if (hadNew) {
         // Prepend only the genuinely new messages at the top.
-        final existingIds = messages.map((m) => m['id']?.toString()).toSet();
+        // A message just sent keeps its local id and stores the server's id as
+        // thread_id, so match on both or the poll adds a second copy of it.
+        final existingIds = <String?>{
+          for (final m in messages) ...[
+            m['id']?.toString(),
+            if (m['thread_id'] != null) m['thread_id'].toString(),
+          ],
+        };
         final newOnly = fresh
             .where(
               (m) =>
