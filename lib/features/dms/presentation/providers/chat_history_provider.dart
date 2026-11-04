@@ -180,7 +180,11 @@ class ChatHistoryNotifier extends ChangeNotifier {
   }
 
   // What each message was sent with, so a retry sends it the same way.
-  final Map<String, ({List<XFile>? media, bool isChannel})> _sendOptions = {};
+  final Map<
+    String,
+    ({List<XFile>? media, List<dynamic>? mentions, bool isChannel})
+  >
+  _sendOptions = {};
 
   /// Deletes voice recordings this app made once their message is sent. Files
   /// the user picked are never deleted.
@@ -217,7 +221,11 @@ class ChatHistoryNotifier extends ChangeNotifier {
         ],
     };
 
-    _sendOptions[tempId] = (media: media, isChannel: isChannel);
+    _sendOptions[tempId] = (
+      media: media,
+      mentions: mentions,
+      isChannel: isChannel,
+    );
     messages = [optimisticMessage, ...messages];
     notifyListeners();
 
@@ -275,6 +283,7 @@ class ChatHistoryNotifier extends ChangeNotifier {
         channelId,
         content,
         media: options?.media,
+        mentions: options?.mentions,
         isChannel: options?.isChannel ?? false,
       );
       _sendOptions.remove(messageId);
