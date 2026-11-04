@@ -137,10 +137,19 @@ class UserProfileNotifier extends Notifier<UserProfileState> {
       clearError: true,
       clearSuccess: true,
     );
+    final orgId = ref.read(workspaceProvider).selectedWorkspace?.id;
     final result = await _repository.updateNotificationPreferences(
-      orgId: ref.read(workspaceProvider).selectedWorkspace?.id,
+      orgId: orgId,
       preferences: preferences,
     );
+    // The user may have switched workspace while the save was in flight. Its
+    // answer belongs to the old workspace, so it must not replace what the new
+    // workspace shows or announce a save for it.
+    if (!ref.mounted) return;
+    if (ref.read(workspaceProvider).selectedWorkspace?.id != orgId) {
+      state = state.copyWith(isSaving: false);
+      return;
+    }
     switch (result) {
       case Success<NotificationPreferences>():
         state = state.copyWith(
