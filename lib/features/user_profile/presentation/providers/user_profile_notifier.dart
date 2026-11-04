@@ -11,6 +11,11 @@ class UserProfileNotifier extends Notifier<UserProfileState> {
   /// (switching A to B and back to A).
   int _loadCounter = 0;
 
+  /// The workspace whose organisation and notification data the state holds,
+  /// and whether any load has filled it yet.
+  String? _loadedOrgId;
+  bool _hasLoaded = false;
+
   @override
   UserProfileState build() {
     _repository = ref.read(userProfileRepositoryProvider);
@@ -562,16 +567,28 @@ class UserProfileNotifier extends Notifier<UserProfileState> {
     // start, so check again right before writing the state.
     if (_isObsoleteLoad(loadId, orgId)) return;
 
+    // copyWith keeps the old value for a null, which is right for a retry on
+    // the same workspace. After switching workspace the old organisation and
+    // notification choices belong to another workspace, so a failed load must
+    // clear them instead of showing (and later saving) them under this one.
+    final switchedWorkspace = !_hasLoaded || _loadedOrgId != orgId;
+    final notifications = _valueOrNull(notificationResult);
+    final organization = _valueOrNull(organizationResult);
+    _loadedOrgId = orgId;
+    _hasLoaded = true;
+
     state = state.copyWith(
       account: _valueOrNull(accountResult),
-      notifications: _valueOrNull(notificationResult),
+      notifications: notifications,
       securitySessions: _valueOrNull(securityResult) ?? const [],
-      organization: _valueOrNull(organizationResult),
+      organization: organization,
       teamMembers: loadedTeamMembers,
       rolesAndPermissions: _valueOrNull(rolesResult) ?? const [],
       billing: _valueOrNull(billingResult),
       isLoading: false,
       error: error,
+      clearNotifications: switchedWorkspace && notifications == null,
+      clearOrganization: switchedWorkspace && organization == null,
     );
   }
 
