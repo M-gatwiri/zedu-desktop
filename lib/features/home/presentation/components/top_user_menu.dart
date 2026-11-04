@@ -26,6 +26,18 @@ class TopUserMenu extends ConsumerWidget {
           if (context.mounted) {
             context.go(AppRouter.profile);
           }
+        } else if (value == 'terms') {
+          await launchUrl(Uri.parse(kTermsUrl));
+        } else if (value == 'privacy') {
+          await launchUrl(Uri.parse(kPrivacyUrl));
+        } else if (value == 'report') {
+          if (context.mounted) {
+            await reportContent(
+              context,
+              subject: 'Report a problem in Zedu',
+              details: 'Describe the person, message or problem:',
+            );
+          }
         } else if (value == 'logout') {
           await ref.read(authNotifierProvider.notifier).logout();
           if (context.mounted) {
@@ -95,6 +107,46 @@ class TopUserMenu extends ConsumerWidget {
             ],
           ),
         ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'report',
+          child: Row(
+            children: [
+              Icon(Icons.flag_outlined, size: 20, color: colors.textPrimary),
+              const SizedBox(width: 8),
+              const Text('Report a problem'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'terms',
+          child: Row(
+            children: [
+              Icon(
+                Icons.description_outlined,
+                size: 20,
+                color: colors.textPrimary,
+              ),
+              const SizedBox(width: 8),
+              const Text('Terms of Service'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'privacy',
+          child: Row(
+            children: [
+              Icon(
+                Icons.privacy_tip_outlined,
+                size: 20,
+                color: colors.textPrimary,
+              ),
+              const SizedBox(width: 8),
+              const Text('Privacy Policy'),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
         PopupMenuItem(
           value: 'logout',
           child: Row(

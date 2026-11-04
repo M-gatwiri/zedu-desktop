@@ -121,20 +121,21 @@ class _WorkspaceSwitcherHeaderState
               ),
             ),
           ),
-          IconButton(
-            tooltip: 'New conversation',
-            onPressed: () {
-              ref.read(selectedDmProvider.notifier).select(null);
-              ref.read(activeChatProvider.notifier).selectNewGroupChat();
-            },
-            icon: Icon(
-              Icons.add,
-              color: colors.onPrimary.withValues(alpha: 0.7),
-              size: 20,
+          if (kUnfinishedFeaturesEnabled)
+            IconButton(
+              tooltip: 'New conversation',
+              onPressed: () {
+                ref.read(selectedDmProvider.notifier).select(null);
+                ref.read(activeChatProvider.notifier).selectNewGroupChat();
+              },
+              icon: Icon(
+                Icons.add,
+                color: colors.onPrimary.withValues(alpha: 0.7),
+                size: 20,
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
             ),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
         ],
       ),
     );

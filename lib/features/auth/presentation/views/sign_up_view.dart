@@ -9,8 +9,8 @@ class SignUpView extends ConsumerStatefulWidget {
 }
 
 class _SignUpViewState extends ConsumerState<SignUpView> {
-  static final _termsUrl = Uri.parse('https://zedu.chat/terms-of-service');
-  static final _privacyUrl = Uri.parse('https://zedu.chat/policy');
+  static final _termsUrl = Uri.parse(kTermsUrl);
+  static final _privacyUrl = Uri.parse(kPrivacyUrl);
 
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -212,54 +212,56 @@ class _SignUpViewState extends ConsumerState<SignUpView> {
                   loading: authState.isLoading,
                   onPressed: _onCreateAccountPressed,
                 ),
-                context.gapV(32),
-                Padding(
-                  padding: context.symmetric(horizontal: 100, vertical: 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          color: context.colors.divider,
-                          height: 0.67,
+                if (kSocialSignInEnabled) ...[
+                  context.gapV(32),
+                  Padding(
+                    padding: context.symmetric(horizontal: 100, vertical: 0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: context.colors.divider,
+                            height: 0.67,
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          'OR',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.72,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'OR',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.72,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: context.colors.divider,
-                          height: 0.67,
+                        Expanded(
+                          child: Divider(
+                            color: context.colors.divider,
+                            height: 0.67,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                context.gapV(32),
-                SocialAuthButton(
-                  icon: 'assets/svgs/google_logo.svg',
-                  label: 'Sign up with Google',
-                  loading: authState.isLoading,
-                  onPressed: _onGooglePressed,
-                ),
-                context.gapV(12),
-                SocialAuthButton(
-                  icon: 'assets/svgs/apple_logo.svg',
-                  label: 'Sign up with Apple',
-                  onPressed: () => AppToastService.show(
-                    context,
-                    type: AppToastType.info,
-                    message: 'Apple sign up is not available yet.',
+                  context.gapV(32),
+                  SocialAuthButton(
+                    icon: 'assets/svgs/google_logo.svg',
+                    label: 'Sign up with Google',
+                    loading: authState.isLoading,
+                    onPressed: _onGooglePressed,
                   ),
-                ),
+                  context.gapV(12),
+                  SocialAuthButton(
+                    icon: 'assets/svgs/apple_logo.svg',
+                    label: 'Sign up with Apple',
+                    onPressed: () => AppToastService.show(
+                      context,
+                      type: AppToastType.info,
+                      message: 'Apple sign up is not available yet.',
+                    ),
+                  ),
+                ],
                 context.gapV(32),
                 Text.rich(
                   TextSpan(

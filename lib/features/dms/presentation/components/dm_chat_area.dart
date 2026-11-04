@@ -130,6 +130,14 @@ class _DmChatAreaState extends ConsumerState<DmChatArea> {
               .clearLocalHistory();
           _showActionNotice('History cleared on this device.');
         }
+      case 'report_user':
+        await reportContent(
+          context,
+          subject: 'Report: ${conversation.displayName}',
+          details:
+              'Reported user: ${conversation.displayName}\n'
+              'User ID: ${conversation.participantId}',
+        );
       case 'delete_conversation':
         final confirmed = await _confirmConversationAction(
           title: 'Delete conversation?',
@@ -791,7 +799,9 @@ class _DmChatHeader extends StatelessWidget {
               menuItem('view_files', 'View files'),
               const PopupMenuDivider(height: 1),
               menuItem('clear_history', 'Clear history'),
-              menuItem('block_user', 'Block User'),
+              menuItem('report_user', 'Report ${conversation.displayName}'),
+              if (kUnfinishedFeaturesEnabled)
+                menuItem('block_user', 'Block User'),
               menuItem(
                 'delete_conversation',
                 'Delete conversation',
@@ -1007,6 +1017,13 @@ class _MessageBubble extends ConsumerWidget {
                     enabled: isMe && status == null,
                     onEdit: () => onEdit(messageId, content),
                     onDelete: () => _confirmDelete(context, ref, messageId),
+                    onReport: isMe
+                        ? null
+                        : () => reportContent(
+                            context,
+                            subject: 'Report: message from $senderName',
+                            details: 'Message from $senderName:\n"$content"',
+                          ),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -1238,12 +1255,16 @@ class _OwnMessageMenu extends StatefulWidget {
     required this.enabled,
     required this.onEdit,
     required this.onDelete,
+    this.onReport,
     required this.child,
   });
 
   final bool enabled;
   final VoidCallback? onEdit;
   final VoidCallback onDelete;
+
+  /// Shown instead of Edit and Delete on other people's messages.
+  final VoidCallback? onReport;
   final Widget child;
 
   @override
@@ -1256,7 +1277,8 @@ class _OwnMessageMenuState extends State<_OwnMessageMenu> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.enabled) return widget.child;
+    final canReport = !widget.enabled && widget.onReport != null;
+    if (!widget.enabled && !canReport) return widget.child;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -1273,19 +1295,29 @@ class _OwnMessageMenuState extends State<_OwnMessageMenu> {
                 key: _menuKey,
                 tooltip: 'Message actions',
                 icon: const Icon(Icons.more_horiz, size: 18),
-                onSelected: (value) =>
-                    value == 'edit' ? widget.onEdit?.call() : widget.onDelete(),
-                itemBuilder: (_) => [
-                  if (widget.onEdit != null)
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Text('Edit message'),
-                    ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Text('Delete message'),
-                  ),
-                ],
+                onSelected: (value) => switch (value) {
+                  'edit' => widget.onEdit?.call(),
+                  'report' => widget.onReport?.call(),
+                  _ => widget.onDelete(),
+                },
+                itemBuilder: (_) => canReport
+                    ? const [
+                        PopupMenuItem(
+                          value: 'report',
+                          child: Text('Report message'),
+                        ),
+                      ]
+                    : [
+                        if (widget.onEdit != null)
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text('Edit message'),
+                          ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text('Delete message'),
+                        ),
+                      ],
               ),
             ),
             Flexible(child: widget.child),

@@ -52,8 +52,30 @@ class CreditsRemoteDataSourceImpl implements CreditsRemoteDataSource {
     final response = await _api.get<Map<String, dynamic>>(
       path: '/credits/usage/$orgId',
     );
-    return CreditUsageModel.fromJson(
-      response.data['data'] as Map<String, dynamic>,
+    final data = response.data['data'];
+    if (data is Map<String, dynamic>) return CreditUsageModel.fromJson(data);
+
+    // The live API returns the usage records as a list (each with an
+    // `amount`), and the balance lives on the organisation, which is also how
+    // the web app reads them.
+    final records = data is List
+        ? data.whereType<Map<String, dynamic>>()
+        : const <Map<String, dynamic>>[];
+    final consumed = records.fold<int>(
+      0,
+      (sum, record) => sum + ((record['amount'] as num?)?.toInt() ?? 0),
+    );
+    final org = await _api.get<Map<String, dynamic>>(
+      path: '/organisations/$orgId',
+    );
+    final orgData = org.data['data'];
+    final balance = orgData is Map<String, dynamic>
+        ? (orgData['credit_balance'] as num?)?.toInt() ?? 0
+        : 0;
+    return CreditUsageModel(
+      balance: balance,
+      totalPurchased: 0,
+      totalConsumed: consumed,
     );
   }
 
@@ -65,8 +87,9 @@ class CreditsRemoteDataSourceImpl implements CreditsRemoteDataSource {
     final response = await _api.get<Map<String, dynamic>>(
       path: '/credits/usage-report/$orgId',
     );
+    final data = response.data['data'];
     return CreditUsageReportModel.fromJson(
-      response.data['data'] as Map<String, dynamic>,
+      data is Map<String, dynamic> ? data : const {},
     );
   }
 

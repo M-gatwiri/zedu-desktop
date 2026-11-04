@@ -15,6 +15,31 @@ const String kDefaultDesktopGoogleClientId =
 /// The website's Contact Sales page, opened from the Enterprise plan.
 const String kDefaultContactSalesUrl = 'https://zedu.chat/contact-sales';
 
+/// Microsoft Store builds pass `--dart-define=STORE_BUILD=true`. Store
+/// certification fails a product for any control that does nothing or only
+/// says "not available yet", so these builds hide unfinished features.
+const bool kStoreBuild = bool.fromEnvironment('STORE_BUILD');
+
+/// Whether login and sign-up show the Google and Apple buttons. Off in Store
+/// builds while the desktop Google code exchange with the backend fails
+/// (`unauthorized_client`); `SOCIAL_SIGN_IN` overrides it either way.
+const bool kSocialSignInEnabled = bool.fromEnvironment(
+  'SOCIAL_SIGN_IN',
+  defaultValue: !kStoreBuild,
+);
+
+/// Whether features that are not wired to the backend yet show up: local-only
+/// group chats (fed by a mock socket), Block User and screen sharing.
+const bool kUnfinishedFeaturesEnabled = !kStoreBuild;
+
+/// Where in-app reports of messages and people go, until the backend has a
+/// report endpoint.
+const String kReportEmail = 'support@emerj.net';
+
+/// Terms of service and privacy policy, linked from sign-up and Settings.
+const String kTermsUrl = 'https://zedu.chat/terms-of-service';
+const String kPrivacyUrl = 'https://zedu.chat/policy';
+
 class AppConfig {
   const AppConfig({
     required this.apiBaseUrl,

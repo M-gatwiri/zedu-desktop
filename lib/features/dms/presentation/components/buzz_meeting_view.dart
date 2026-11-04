@@ -259,18 +259,20 @@ class _BuzzMeetingViewState extends ConsumerState<BuzzMeetingView> {
                   onTap: () => setState(() => _isMuted = !_isMuted),
                   small: false,
                 ),
-                const SizedBox(width: 16),
-                _buildControlButton(
-                  icon: Icons.screen_share_outlined,
-                  tooltip: 'Share screen',
-                  color: colors.primary.withValues(alpha: 0.2),
-                  onTap: () => AppToastService.show(
-                    context,
-                    type: AppToastType.info,
-                    message: 'Screen sharing is not available yet.',
+                if (kUnfinishedFeaturesEnabled) ...[
+                  const SizedBox(width: 16),
+                  _buildControlButton(
+                    icon: Icons.screen_share_outlined,
+                    tooltip: 'Share screen',
+                    color: colors.primary.withValues(alpha: 0.2),
+                    onTap: () => AppToastService.show(
+                      context,
+                      type: AppToastType.info,
+                      message: 'Screen sharing is not available yet.',
+                    ),
+                    small: false,
                   ),
-                  small: false,
-                ),
+                ],
                 const SizedBox(width: 16),
                 _buildControlButton(
                   icon: _isVideoOff ? Icons.videocam_off : Icons.videocam,

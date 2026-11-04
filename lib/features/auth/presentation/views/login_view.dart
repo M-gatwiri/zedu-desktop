@@ -134,58 +134,61 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   ),
                 ),
                 context.gapV(32),
-                SocialAuthButton(
-                  icon: 'assets/svgs/google_logo.svg',
-                  label: 'Sign in with Google',
-                  loading: authState.isLoading,
-                  onPressed: () =>
-                      ref.read(authNotifierProvider.notifier).loginWithGoogle(),
-                ),
-                context.gapV(12),
-                SocialAuthButton(
-                  icon: 'assets/svgs/apple_logo.svg',
-                  label: 'Sign in with Apple',
-                  onPressed: () => AppToastService.show(
-                    context,
-                    type: AppToastType.info,
-                    message: 'Apple sign in is not available yet.',
+                if (kSocialSignInEnabled) ...[
+                  SocialAuthButton(
+                    icon: 'assets/svgs/google_logo.svg',
+                    label: 'Sign in with Google',
+                    loading: authState.isLoading,
+                    onPressed: () => ref
+                        .read(authNotifierProvider.notifier)
+                        .loginWithGoogle(),
                   ),
-                ),
-                context.gapV(26),
-                Padding(
-                  padding: context.symmetric(horizontal: 100, vertical: 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          color: context.colors.divider,
-                          height: 0.67,
+                  context.gapV(12),
+                  SocialAuthButton(
+                    icon: 'assets/svgs/apple_logo.svg',
+                    label: 'Sign in with Apple',
+                    onPressed: () => AppToastService.show(
+                      context,
+                      type: AppToastType.info,
+                      message: 'Apple sign in is not available yet.',
+                    ),
+                  ),
+                  context.gapV(26),
+                  Padding(
+                    padding: context.symmetric(horizontal: 100, vertical: 0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: context.colors.divider,
+                            height: 0.67,
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          'OR',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: Color(
-                              (((theme.colorScheme.onSurface as dynamic).value
-                                          as int) &
-                                      0x00FFFFFF) |
-                                  (((0.72 * 255).round() & 0xFF) << 24),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'OR',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: Color(
+                                (((theme.colorScheme.onSurface as dynamic).value
+                                            as int) &
+                                        0x00FFFFFF) |
+                                    (((0.72 * 255).round() & 0xFF) << 24),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: context.colors.divider,
-                          height: 0.67,
+                        Expanded(
+                          child: Divider(
+                            color: context.colors.divider,
+                            height: 0.67,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                context.gapV(26),
+                  context.gapV(26),
+                ],
                 Form(
                   key: _formKey,
                   child: Column(
