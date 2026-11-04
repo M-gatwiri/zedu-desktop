@@ -118,6 +118,10 @@ class UserProfileNotifier extends Notifier<UserProfileState> {
           isSaving: false,
           successMessage: 'Account deleted successfully.',
         );
+        // The account no longer exists, so end the session too: clear the
+        // token and return to the login screen instead of staying signed in.
+        if (!ref.mounted) return;
+        await ref.read(authNotifierProvider.notifier).logout();
       case Failure<void>():
         state = state.copyWith(
           isSaving: false,
