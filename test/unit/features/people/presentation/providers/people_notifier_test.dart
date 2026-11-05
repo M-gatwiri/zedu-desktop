@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:zedu/core/core.dart';
 import 'package:zedu/features/features.dart';
 
@@ -168,7 +169,7 @@ void main() {
 
         // Complete with failure from org-1
         people.held['org-1/2']!.complete(
-          const Failure(ApiFailure(message: 'late offline error')),
+          const Failure<MembersPage>(ApiFailure(message: 'late offline error')),
         );
         await pending;
 
